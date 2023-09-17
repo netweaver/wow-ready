@@ -62,7 +62,6 @@ RUN mkdir -p /azerothcore/env/dist/etc
 RUN mkdir -p /azerothcore/var/build/obj
 
 # Correct permissions for non-root operations
-RUN chown -R $DOCKER_USER:$DOCKER_USER /home/acore
 RUN chown -R $DOCKER_USER:$DOCKER_USER /run
 RUN chown -R $DOCKER_USER:$DOCKER_USER /opt
 RUN chown -R $DOCKER_USER:$DOCKER_USER /azerothcore
@@ -77,6 +76,7 @@ COPY --chown=$DOCKER_USER:$DOCKER_USER data /azerothcore/data
 COPY --chown=$DOCKER_USER:$DOCKER_USER deps /azerothcore/deps
 COPY --chown=$DOCKER_USER:$DOCKER_USER acore.json /azerothcore/acore.json
 COPY --chown=$DOCKER_USER:$DOCKER_USER acore.sh /azerothcore/acore.sh
+COPY --chown=$DOCKER_USER:$DOCKER_USER modules /azerothcore/modules
 
 # Download deno and make sure the dashboard works
 RUN bash /azerothcore/acore.sh quit
@@ -137,7 +137,6 @@ RUN apt-get update && apt-get install -y dos2unix gdb gdbserver google-perftools
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
 
 # Correct permissions for non-root operations
-RUN chown -R $DOCKER_USER:$DOCKER_USER /home/acore
 RUN chown -R $DOCKER_USER:$DOCKER_USER /run
 RUN chown -R $DOCKER_USER:$DOCKER_USER /opt
 
@@ -190,6 +189,8 @@ USER $DOCKER_USER
 #=================================================================
 FROM base as build
 
+ARG USER_ID=1000
+ARG GROUP_ID=1000
 ARG DOCKER_USER=acore
 USER $DOCKER_USER
 
