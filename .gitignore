@@ -94,6 +94,7 @@ local.properties
 #
 # ==================
 
+!/modules/mod-eluna
 !/modules/mod-playerbots
 
 .cache
