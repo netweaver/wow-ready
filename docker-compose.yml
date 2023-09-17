@@ -26,8 +26,9 @@ x-build-params: &build-params
 x-ac-shared-conf: &ac-shared-conf
   <<: *networks
   working_dir: /azerothcore
-  environment:
+  environment: &x-ac-shared-conf-env #sub-dics can't be merged when overridding or extending, has to break into two anchors, see https://stackoverflow.com/questions/56855785/does-docker-compose-support-merging-extension-field-environment-variables-with-s
     AC_DISABLE_INTERACTIVE: "1"
+    TZ: "${DOCKER_TIME_ZONE:-Etc/UTC}" 
 
 x-ac-service-conf: &ac-service-conf
   <<: *ac-shared-conf
@@ -119,6 +120,7 @@ services:
     env_file:
         ${DOCKER_AC_ENV_FILE:-conf/dist/env.ac}
     environment:
+      <<: *x-ac-shared-conf-env
       AC_DATA_DIR: "/azerothcore/env/dist/data"
       AC_LOGS_DIR: "/azerothcore/env/dist/logs"
       AC_LOGIN_DATABASE_INFO: "ac-database;3306;root;${DOCKER_DB_ROOT_PASSWORD:-password};acore_auth"
@@ -146,6 +148,7 @@ services:
     image: acore/ac-wotlk-worldserver-local:${DOCKER_IMAGE_TAG:-master} # name of the generated image after built locally
     command: ./env/dist/bin/dbimport
     environment:
+      <<: *x-ac-shared-conf-env
       AC_DATA_DIR: "/azerothcore/env/dist/data"
       AC_LOGS_DIR: "/azerothcore/env/dist/logs"
       AC_LOGIN_DATABASE_INFO: "ac-database;3306;root;${DOCKER_DB_ROOT_PASSWORD:-password};acore_auth"
@@ -181,6 +184,7 @@ services:
     env_file:
         ${DOCKER_AC_ENV_FILE:-conf/dist/env.ac}
     environment:
+      <<: *x-ac-shared-conf-env
       AC_DATA_DIR: "/azerothcore/env/dist/data"
       AC_LOGS_DIR: "/azerothcore/env/dist/logs"
       AC_LOGIN_DATABASE_INFO: "ac-database;3306;root;${DOCKER_DB_ROOT_PASSWORD:-password};acore_auth"
@@ -219,6 +223,7 @@ services:
     env_file:
         ${DOCKER_AC_ENV_FILE:-conf/dist/env.ac}
     environment:
+      <<: *x-ac-shared-conf-env
       AC_LOGS_DIR: "/azerothcore/env/dist/logs"
       AC_TEMP_DIR: "/azerothcore/env/dist/temp"
       AC_LOGIN_DATABASE_INFO: "ac-database;3306;root;${DOCKER_DB_ROOT_PASSWORD:-password};acore_auth"
@@ -288,6 +293,7 @@ services:
     env_file:
       ${DOCKER_AC_ENV_FILE:-conf/dist/env.ac}
     environment:
+      <<: *x-ac-shared-conf-env
       AC_DATA_DIR: "/azerothcore/env/dist/data"
       AC_LOGS_DIR: "/azerothcore/env/dist/logs"
       AC_LOGIN_DATABASE_INFO: "ac-database;3306;root;${DOCKER_DB_ROOT_PASSWORD:-password};acore_auth"
@@ -323,6 +329,7 @@ services:
     env_file:
       ${DOCKER_AC_ENV_FILE:-conf/dist/env.ac}
     environment:
+      <<: *x-ac-shared-conf-env
       AC_LOGS_DIR: "/azerothcore/env/dist/logs"
       AC_TEMP_DIR: "/azerothcore/env/dist/temp"
       AC_LOGIN_DATABASE_INFO: "ac-database;3306;root;${DOCKER_DB_ROOT_PASSWORD:-password};acore_auth"
@@ -375,6 +382,7 @@ services:
     image: acore/ac-wotlk-worldserver:${DOCKER_IMAGE_TAG:-master} # name of the generated image after built locally
     command: ./env/dist/bin/dbimport
     environment:
+      <<: *x-ac-shared-conf-env
       AC_DATA_DIR: "/azerothcore/env/dist/data"
       AC_LOGS_DIR: "/azerothcore/env/dist/logs"
       AC_LOGIN_DATABASE_INFO: "ac-database;3306;root;${DOCKER_DB_ROOT_PASSWORD:-password};acore_auth"
