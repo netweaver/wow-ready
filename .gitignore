@@ -97,5 +97,6 @@ local.properties
 !/modules/mod-eluna
 !/modules/mod-playerbots
 
-.cache
-compile_commands.json
+#NPCBots
+!/data/sql/custom/db_characters/
+!/data/sql/custom/db_world/
