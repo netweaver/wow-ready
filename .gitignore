@@ -96,6 +96,7 @@ local.properties
 
 !/modules/mod-eluna
 !/modules/mod-playerbots
+!/modules/mod-ah-bot
 
 #NPCBots
 !/data/sql/custom/db_characters/
