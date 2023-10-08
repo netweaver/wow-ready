@@ -178,6 +178,7 @@ public:
     [[nodiscard]] uint32 GetSpellCooldown(uint32 spell_id) const;
     void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs) override;
     [[nodiscard]] bool IsSpellProhibited(SpellSchoolMask idSchoolMask) const;
+    void ClearProhibitedSpellTimers();
 
     [[nodiscard]] bool HasSpell(uint32 spellID) const override;
 
@@ -411,6 +412,12 @@ public:
      *
      * */
     void ResumeChasingVictim() { GetMotionMaster()->MoveChase(GetVictim()); };
+
+    /**
+     * @brief Returns true if the creature is able to cast the spell.
+     *
+     * */
+    bool CanCastSpell(uint32 spellID) const;
 
     std::string GetDebugInfo() const override;
 
