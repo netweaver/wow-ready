@@ -1504,7 +1504,6 @@ bool ScriptMgr::OnBeforePlayerResurrect(Player* player, float restore_percent, b
         //print script name and scriptRet to logs
         LOG_DEBUG("scripts.hook", "ScriptMgr - OnBeforePlayerResurrect - Script: {} , scriptRet: {} ", script->GetName(), scriptRet ? "true" : "false");
         return !scriptRet;
-        
     });
 
     if (ret && *ret)
