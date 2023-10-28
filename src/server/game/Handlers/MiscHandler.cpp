@@ -668,10 +668,11 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recv_data)
         return;
 
     // resurrect
-    _player->ResurrectPlayer(_player->InBattleground() ? 1.0f : 0.5f);
-
-    // spawn bones
-    _player->SpawnCorpseBones();
+    if(_player->ResurrectPlayer(_player->InBattleground() ? 1.0f : 0.5f))
+    {
+        // spawn bones
+        _player->SpawnCorpseBones();
+    }    
 }
 
 void WorldSession::HandleResurrectResponseOpcode(WorldPacket& recv_data)
@@ -837,8 +838,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
                 {
                     if (player->GetCorpseLocation().GetMapId() == at->target_mapId)
                     {
-                        player->ResurrectPlayer(0.5f);
-                        player->SpawnCorpseBones();
+                        if(player->ResurrectPlayer(0.5f))
+                            player->SpawnCorpseBones();
                     }
                 }
             }
@@ -1746,9 +1747,11 @@ void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recv_data*/)
         return;
 
     _player->BuildPlayerRepop();
-    _player->ResurrectPlayer(1.0f);
-    _player->SpawnCorpseBones();
-    _player->TeleportTo(_player->m_homebindMapId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ, _player->m_homebindO);
+    if (_player->ResurrectPlayer(1.0f))
+    {
+        _player->SpawnCorpseBones();
+        _player->TeleportTo(_player->m_homebindMapId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ, _player->m_homebindO);
+    }
 }
 
 void WorldSession::HandleInstanceLockResponse(WorldPacket& recvPacket)

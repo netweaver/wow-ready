@@ -1623,22 +1623,27 @@ void Player::ProcessDelayedOperations()
 
     if (m_DelayedOperations & DELAYED_RESURRECT_PLAYER)
     {
-        ResurrectPlayer(0.0f, false);
+        if(ResurrectPlayer(0.0f, false))
+        {
+            if (GetMaxHealth() > m_resurrectHealth)
+                SetHealth(m_resurrectHealth);
+            else
+                SetFullHealth();
 
-        if (GetMaxHealth() > m_resurrectHealth)
-            SetHealth(m_resurrectHealth);
-        else
-            SetFullHealth();
+            if (GetMaxPower(POWER_MANA) > m_resurrectMana)
+                SetPower(POWER_MANA, m_resurrectMana);
+            else
+                SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
 
-        if (GetMaxPower(POWER_MANA) > m_resurrectMana)
-            SetPower(POWER_MANA, m_resurrectMana);
-        else
-            SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+            SetPower(POWER_RAGE, 0);
+            SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
 
-        SetPower(POWER_RAGE, 0);
-        SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
-
-        SpawnCorpseBones();
+            SpawnCorpseBones();            
+        }
+        // Remove unattackable flag after resurrection
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
+        LOG_INFO("misc.resurect", "Player::ProcessDelayedOperations Remove unattackable");
     }
 
     if (m_DelayedOperations & DELAYED_SAVE_PLAYER)
@@ -4486,20 +4491,19 @@ void Player::BuildPlayerRepop()
     sScriptMgr->OnPlayerReleasedGhost(this);
 }
 
-void Player::ResurrectPlayer(float restore_percent, bool applySickness)
+bool Player::ResurrectPlayer(float restore_percent, bool applySickness/* = false*/, bool forceResurrection/* = false*/)
 {
     LOG_DEBUG("entities.player", "Player::ResurrectPlayer: enter Resurrecting player {} ({})", GetName(), GetGUID().ToString());
 
     //call the beforePlayerResurrect script first
-    //if false is returned, no resurrection will occur
-    if (!sScriptMgr->OnBeforePlayerResurrect(this, restore_percent, applySickness))
+    //if false is returned, no resurrection will occur unless forceResurrection is true
+    if (!sScriptMgr->OnBeforePlayerResurrect(this, restore_percent, applySickness) && !forceResurrection)
     {
         LOG_DEBUG("entities.player", "Player::ResurrectPlayer: OnBeforePlayerResurrect returned false for player {} ({})", GetName(), GetGUID().ToString());
-        return;
+        return false;
     }
 
     LOG_DEBUG("entities.player", "Player::ResurrectPlayer: begin Resurrecting player {} ({})", GetName(), GetGUID().ToString());
-        
 
     WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);        // remove spirit healer position
     data << uint32(-1);
@@ -4549,7 +4553,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 
     if (!applySickness)
     {
-        return;
+        return true;
     }
 
     //Characters from level 1-10 are not affected by resurrection sickness.
@@ -4574,6 +4578,8 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
             }
         }
     }
+
+    return true;
 }
 
 void Player::KillPlayer()
@@ -4959,8 +4965,8 @@ void Player::RepopAtGraveyard()
     // Xinef: Get Transport Check is not needed
     if ((!IsAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) /*|| GetTransport()*/ || GetPositionZ() < GetMap()->GetMinHeight(GetPositionX(), GetPositionY()))
     {
-        ResurrectPlayer(0.5f);
-        SpawnCorpseBones();
+        if (ResurrectPlayer(0.5f))
+            SpawnCorpseBones();
     }
 
     GraveyardStruct const* ClosestGrave = nullptr;
@@ -12922,8 +12928,10 @@ uint32 Player::GetBaseWeaponSkillValue(WeaponAttackType attType) const
 
 void Player::ResurectUsingRequestData()
 {
-    /// Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
-    TeleportTo(m_resurrectMap, m_resurrectX, m_resurrectY, m_resurrectZ, GetOrientation());
+    // Set the player as unattackable during resurrection (instead of teleport first which causes many issues), otherwise the player might get attacked 
+    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
+
 
     if (IsBeingTeleported())
     {
@@ -12931,23 +12939,34 @@ void Player::ResurectUsingRequestData()
         return;
     }
 
-    ResurrectPlayer(0.0f, false);
+    if(ResurrectPlayer(0.0f, false))
+    {
+        if (GetMaxHealth() > m_resurrectHealth)
+            SetHealth(m_resurrectHealth);
+        else
+            SetFullHealth();
 
-    if (GetMaxHealth() > m_resurrectHealth)
-        SetHealth(m_resurrectHealth);
+        if (GetMaxPower(POWER_MANA) > m_resurrectMana)
+            SetPower(POWER_MANA, m_resurrectMana);
+        else
+            SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+
+        SetPower(POWER_RAGE, 0);
+
+        SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
+
+        SpawnCorpseBones();
+
+        // Teleport the player to resurrect location
+        TeleportTo(m_resurrectMap, m_resurrectX, m_resurrectY, m_resurrectZ, GetOrientation());
+    }
     else
-        SetFullHealth();
+        clearResurrectRequestData();
 
-    if (GetMaxPower(POWER_MANA) > m_resurrectMana)
-        SetPower(POWER_MANA, m_resurrectMana);
-    else
-        SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
-
-    SetPower(POWER_RAGE, 0);
-
-    SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
-
-    SpawnCorpseBones();
+    // Remove unattackable flag after resurrection
+    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
+    LOG_INFO("misc.resurect", "Player::ResurectUsingRequestData Remove unattackable flag");
 }
 
 void Player::SetClientControl(Unit* target, bool allowMove, bool packetOnly /*= false*/)

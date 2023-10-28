@@ -1385,7 +1385,7 @@ public:
 
     // Called when a player is about to be resurrected, if false is returned the player will not be resurrected
     [[nodiscard]] virtual bool OnBeforePlayerResurrect(Player* /*player*/, float /*restore_percent*/, bool /*applySickness*/) { return true; }
-    
+
     virtual void OnPlayerResurrect(Player* /*player*/, float /*restore_percent*/, bool /*applySickness*/) { }
 
     // Called before selecting the graveyard when releasing spirit

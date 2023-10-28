@@ -592,8 +592,8 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recvData)
         // resurrect the player
         if (!_player->IsAlive())
         {
-            _player->ResurrectPlayer(1.0f);
-            _player->SpawnCorpseBones();
+            if(_player->ResurrectPlayer(1.0f))
+                _player->SpawnCorpseBones();
         }
 
         TeamId teamId = ginfo.teamId;

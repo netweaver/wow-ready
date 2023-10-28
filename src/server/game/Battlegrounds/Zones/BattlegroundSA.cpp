@@ -529,8 +529,8 @@ void BattlegroundSA::TeleportPlayers()
 
             if (!player->IsAlive())
             {
-                player->ResurrectPlayer(1.0f);
-                player->SpawnCorpseBones();
+                if (player->ResurrectPlayer(1.0f))
+                    player->SpawnCorpseBones();
             }
 
             if (Status == BG_SA_SECOND_WARMUP)

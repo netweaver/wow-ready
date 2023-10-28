@@ -2006,7 +2006,7 @@ public:
     [[nodiscard]] bool HasCorpse() const { return _corpseLocation.GetMapId() != MAPID_INVALID; }
     [[nodiscard]] WorldLocation GetCorpseLocation() const { return _corpseLocation; }
     uint32 GetResurrectionSpellId();
-    void ResurrectPlayer(float restore_percent, bool applySickness = false);
+    bool ResurrectPlayer(float restore_percent, bool applySickness = false, bool forceResurrection = false);
     void BuildPlayerRepop();
     void RepopAtGraveyard();
 

@@ -1149,7 +1149,7 @@ public:
         {
             auto targetPlayer = target->GetConnectedPlayer();
 
-            targetPlayer->ResurrectPlayer(!AccountMgr::IsPlayerAccount(targetPlayer->GetSession()->GetSecurity()) ? 1.0f : 0.5f);
+            targetPlayer->ResurrectPlayer(!AccountMgr::IsPlayerAccount(targetPlayer->GetSession()->GetSecurity()) ? 1.0f : 0.5f, false, true);
             targetPlayer->SpawnCorpseBones();
             targetPlayer->SaveToDB(false, false);
         }

@@ -450,10 +450,12 @@ inline void Battleground::_ProcessResurrect(uint32 diff)
             Player* player = ObjectAccessor::FindPlayer(guid);
             if (!player)
                 continue;
-            player->ResurrectPlayer(1.0f);
-            player->CastSpell(player, 6962, true);
-            player->CastSpell(player, SPELL_SPIRIT_HEAL_MANA, true);
-            player->SpawnCorpseBones(false);
+            if(player->ResurrectPlayer(1.0f))
+            {
+                player->CastSpell(player, 6962, true);
+                player->CastSpell(player, SPELL_SPIRIT_HEAL_MANA, true);
+                player->SpawnCorpseBones(false);
+            }
         }
         m_ResurrectQueue.clear();
     }
@@ -946,8 +948,8 @@ void Battleground::EndBattleground(PvPTeamId winnerTeamId)
 
         if (!player->IsAlive())
         {
-            player->ResurrectPlayer(1.0f);
-            player->SpawnCorpseBones();
+            if(player->ResurrectPlayer(1.0f))
+                player->SpawnCorpseBones();
         }
         else
         {
@@ -1104,8 +1106,8 @@ void Battleground::RemovePlayerAtLeave(Player* player)
     // resurrect on exit
     if (!player->IsAlive())
     {
-        player->ResurrectPlayer(1.0f);
-        player->SpawnCorpseBones();
+        if(player->ResurrectPlayer(1.0f))
+            player->SpawnCorpseBones();
     }
 
     //npcbot

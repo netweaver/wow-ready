@@ -25,7 +25,7 @@ inline Optional<bool> IsValidBoolScript(std::function<bool(ScriptName*)> execute
 {
     if (ScriptRegistry<ScriptName>::ScriptPointerList.empty())
         return {};
-    
+
     bool ret = false;
     for (auto const& [scriptID, script] : ScriptRegistry<ScriptName>::ScriptPointerList)
     {

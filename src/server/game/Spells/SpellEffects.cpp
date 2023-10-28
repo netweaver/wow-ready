@@ -5110,7 +5110,8 @@ void Spell::EffectSelfResurrect(SpellEffIndex effIndex)
     }
 
     Player* player = m_caster->ToPlayer();
-    player->ResurrectPlayer(0.0f);
+    if(!player->ResurrectPlayer(0.0f))
+        return;
 
     player->SetHealth(health);
     player->SetPower(POWER_MANA, mana);
