@@ -16,6 +16,7 @@ services:
       - ${DOCKER_DB_EXTERNAL_PORT:-3306}:3306
     environment:
       - MYSQL_ROOT_PASSWORD=${DOCKER_DB_ROOT_PASSWORD:-password}
+      - TZ=${DOCKER_TIME_ZONE:-Etc/UTC}
     volumes:
       - type: volume
         source: ac-database
@@ -36,6 +37,11 @@ services:
       context: .
       target: db-import
       dockerfile: apps/docker/Dockerfile
+      args:
+        USER_ID: ${DOCKER_USER_ID:-1000}
+        GROUP_ID: ${DOCKER_GROUP_ID:-1000}
+        DOCKER_USER: ${DOCKER_USER:-acore}
+        TZ: ${DOCKER_TIME_ZONE:-Etc/UTC}
     environment:
       AC_DATA_DIR: "/azerothcore/env/dist/data"
       AC_LOGS_DIR: "/azerothcore/env/dist/logs"
@@ -57,11 +63,17 @@ services:
       context: .
       target: worldserver
       dockerfile: apps/docker/Dockerfile
+      args:
+        USER_ID: ${DOCKER_USER_ID:-1000}
+        GROUP_ID: ${DOCKER_GROUP_ID:-1000}
+        DOCKER_USER: ${DOCKER_USER:-acore}
+        TZ: ${DOCKER_TIME_ZONE:-Etc/UTC}
     networks:
       - ac-network
     stdin_open: true
     tty: true
     restart: unless-stopped
+    privileged: true
     env_file:
         ${DOCKER_AC_ENV_FILE:-conf/dist/env.ac}
     environment:
@@ -94,6 +106,11 @@ services:
       context: .
       target: authserver
       dockerfile: apps/docker/Dockerfile
+      args:
+        USER_ID: ${DOCKER_USER_ID:-1000}
+        GROUP_ID: ${DOCKER_GROUP_ID:-1000}
+        DOCKER_USER: ${DOCKER_USER:-acore}
+        TZ: ${DOCKER_TIME_ZONE:-Etc/UTC}
     networks:
       - ac-network
     tty: true
@@ -128,6 +145,7 @@ services:
         USER_ID: ${DOCKER_USER_ID:-1000}
         GROUP_ID: ${DOCKER_GROUP_ID:-1000}
         DOCKER_USER: ${DOCKER_USER:-acore}
+        TZ: ${DOCKER_TIME_ZONE:-Etc/UTC}
     volumes:
       - ${DOCKER_VOL_CLIENT_DATA:-ac-client-data}:/azerothcore/env/dist/data
 
@@ -167,6 +185,7 @@ services:
         USER_ID: ${DOCKER_USER_ID:-1000}
         GROUP_ID: ${DOCKER_GROUP_ID:-1000}
         DOCKER_USER: ${DOCKER_USER:-acore}
+        TZ: ${DOCKER_TIME_ZONE:-Etc/UTC}
       target: dev
     env_file:
         ${DOCKER_AC_ENV_FILE:-conf/dist/env.ac}

@@ -8,6 +8,7 @@ FROM ubuntu:$UBUNTU_VERSION as skeleton
 ARG DOCKER=1
 ARG DEBIAN_FRONTEND=noninteractive
 
+ARG TZ
 ENV TZ=$TZ
 ENV AC_FORCE_CREATE_DB=1
 
@@ -144,6 +145,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 ###############
 
 FROM runtime as authserver
+
 LABEL description "AzerothCore Auth Server"
 
 ENV ACORE_COMPONENT=authserver
@@ -210,17 +212,28 @@ CMD /azerothcore/env/dist/bin/dbimport
 
 FROM skeleton as client-data
 
+ARG DOCKER_USER=acore
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+ARG TZ
+ENV TZ=$TZ
+
 LABEL description="AzerothCore client-data"
 
 ENV DATAPATH=/azerothcore/env/dist/data
+
+VOLUME /azerothcore/env/dist/data
 
 RUN apt-get update && \
     apt-get install -y curl unzip && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --chown=$DOCKER_USER:$DOCKER_USER apps apps
+RUN groupadd --gid "$GROUP_ID"  "$DOCKER_USER" && \
+    useradd -d /azerothcore --uid "$USER_ID"  --gid "$GROUP_ID"  "$DOCKER_USER" && \
+    passwd -d "$DOCKER_USER" && \
+    chown -R "$DOCKER_USER:$DOCKER_USER" /azerothcore/env/dist/data
 
-VOLUME /azerothcore/env/dist/data
+COPY --chown=$DOCKER_USER:$DOCKER_USER apps apps
 
 USER $DOCKER_USER
 
