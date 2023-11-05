@@ -381,8 +381,8 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):
     m_base(base), m_spellInfo(base->GetSpellInfo()),
-    m_baseAmount(baseAmount ? * baseAmount : m_spellInfo->Effects[effIndex].BasePoints), m_critChance(0),
-    m_oldAmount(0), m_isAuraEnabled(true), m_channelData(nullptr), m_spellmod(nullptr), m_periodicTimer(0), m_tickNumber(0), m_effIndex(effIndex),
+    m_baseAmount(baseAmount ? * baseAmount : m_spellInfo->Effects[effIndex].BasePoints), m_dieSides(m_spellInfo->Effects[effIndex].DieSides),
+    m_critChance(0), m_oldAmount(0), m_isAuraEnabled(true), m_channelData(nullptr), m_spellmod(nullptr), m_periodicTimer(0), m_tickNumber(0), m_effIndex(effIndex),
     m_canBeRecalculated(true), m_isPeriodic(false)
 {
     CalculatePeriodic(caster, true, false);
@@ -1773,7 +1773,7 @@ void AuraEffect::HandleSpiritOfRedemption(AuraApplication const* aurApp, uint8 m
     // die at aura end
     else if (target->IsAlive())
         // call functions which may have additional effects after chainging state of unit
-        target->setDeathState(JUST_DIED);
+        target->setDeathState(DeathState::JustDied);
 
     // xinef: damage immunity spell, not needed because of 93 aura (adds non_attackable state)
     // xinef: probably blizzard added it just in case in wotlk (id > 46000)
@@ -2467,7 +2467,7 @@ void AuraEffect::HandleFeignDeath(AuraApplication const* aurApp, uint8 mode, boo
         */
 
         UnitList targets;
-        Acore::AnyUnfriendlyUnitInObjectRangeCheck u_check(target, target, target->GetVisibilityRange()); // no VISIBILITY_COMPENSATION, distance is enough
+        Acore::AnyUnfriendlyUnitInObjectRangeCheck u_check(target, target, target->GetVisibilityRange());
         Acore::UnitListSearcher<Acore::AnyUnfriendlyUnitInObjectRangeCheck> searcher(target, targets, u_check);
         Cell::VisitAllObjects(target, searcher, target->GetMap()->GetVisibilityRange());
         for (UnitList::iterator iter = targets.begin(); iter != targets.end(); ++iter)
