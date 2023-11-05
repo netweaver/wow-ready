@@ -817,7 +817,7 @@ Creature* Battlefield::SpawnCreature(uint32 entry, float x, float y, float z, fl
 
     // Set creature in world
     map->AddToMap(creature);
-    creature->setActive(true);
+    creature->SetFarVisible(true);
 
     return creature;
 }
@@ -842,7 +842,7 @@ GameObject* Battlefield::SpawnGameObject(uint32 entry, float x, float y, float z
 
     // Add to world
     map->AddToMap(go);
-    go->setActive(true);
+    go->SetFarVisible(true);
 
     return go;
 }
